@@ -290,6 +290,7 @@ module.exports = {
 npm install -D \
   eslint@^8.6.0 \
   eslint-config-airbnb@latest \
+  eslint-config-airbnb-typescript \
   eslint-config-prettier \
   eslint-plugin-import@^2.25.3 \
   eslint-plugin-jsx-a11y@^6.5.1 \
@@ -310,7 +311,14 @@ touch .eslintrc.js
     "browser": true,
     "es2021": true
   },
-  "extends": ["plugin:react/recommended", "airbnb"],
+  "extends": [
+    "plugin:react/recommended",
+    "airbnb",
+    "airbnb-typescript",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript"
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
@@ -341,7 +349,8 @@ touch .eslintrc.js
   "settings": {
     "import/resolver": {
       "node": {
-        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
+        "moduleDirectory": ["node_modules", "src/"]
       }
     }
   }
