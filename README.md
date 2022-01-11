@@ -3,20 +3,23 @@
 ## Initialize a Project
 ```
 mkdir react-from-scratch
-
+```
+```
 cd react-from-stratch
-
+```
+```
 npm init -y
 ```
 
 ## Primary Setup
 ```
 mkdir src
-cd src
-touch index.html
+```
+```
+touch src/index.html
 ```
 
-### index.html
+#### src/index.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -32,38 +35,42 @@ touch index.html
 </html>
 ```
 
-## Install React
+## React
+
+### Install React
 ```
 npm install react react-dom
 ```
 
-## Create Index File
+### Create Index File
 ```
-touch index.tsx
+touch src/index.tsx
 ```
 
-### index.tsx
+### src/index.tsx
 ```js
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 ReactDOM.render( 
-  <div> This is a new react app</div>, 
+  <div>This is a new react app</div>, 
   document.getElementById('root')
 );
 ```
 
-## Install TypeScript
+## TypeScript
+
+### Install Typescript
 ```
 npm install -D typescript @types/react @types/react-dom
 ```
 
-## Configure TypeScript
+### Configure TypeScript
 ```
 touch tsconfig.json
 ```
 
-### tsconfig.json
+#### tsconfig.json
 ```json
 {
   "compilerOptions": {
@@ -84,13 +91,19 @@ touch tsconfig.json
     "resolveJsonModule": true,
     "allowJs": true,
     "checkJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "build"]
+  "exclude": ["node_modules", "build", "dist"]
 }
 ```
 
-## Install Babel
+## Babel
+
+### Instal Babel
 ```
 npm install -D \
   @babel/core \
@@ -99,39 +112,58 @@ npm install -D \
   @babel/preset-typescript \
   @babel/preset-react \
   @babel/runtime \
-  @babel/plugin-transform-runtime
+  @babel/plugin-transform-runtime \
+  @babel/plugin-transform-modules-commonjs \
+  babel-plugin-module-resolver
 ```
 
-## Configure Babel
+### Configure Babel
 ```
-touch .babelrc
+touch babel.config.js
 ```
 
-### .babelrc
-```json
-{
-  "presets": [
-    "@babel/preset-env",
-    [
-      "@babel/preset-react",
-      {
-        "runtime": "automatic"
-      }
-    ],
-    "@babel/preset-typescript"
-  ],
-  "plugins": [
-    [
-      "@babel/plugin-transform-runtime",
-      {
-        "regenerator": true
-      }
-    ]
-  ]
+#### babel.config.js
+```js
+/* eslint-disable no-restricted-syntax */
+const { compilerOptions } = require('./tsconfig.json');
+
+function getPaths() {
+  const { paths: tsconfigPaths } = compilerOptions;
+  const babelPaths = {};
+  for (const [key, value] of Object.entries(tsconfigPaths)) {
+    babelPaths[key.substring(0, key.length - 2)] = value[0].substring(0, value[0].length - 2);
+  }
+  return babelPaths;
 }
+
+module.exports = {
+  presets: [
+    '@babel/preset-env',
+    [
+      '@babel/preset-react',
+      {
+        runtime: 'automatic',
+      },
+    ],
+    '@babel/preset-typescript',
+  ],
+  plugins: [
+    [
+      '@babel/plugin-transform-runtime',
+      {
+        regenerator: true,
+      },
+    ],
+    ['module-resolver', {
+      alias: getPaths(),
+    }],
+  ],
+};
 ```
 
-## Install webpack
+## Webpack
+
+### Install Webpack
 ```
 npm install -D \
   webpack \
@@ -139,11 +171,12 @@ npm install -D \
   webpack-dev-server \
   style-loader \
   css-loader \
+  sass \
+  sass-loader \
   babel-loader \
   html-webpack-plugin \
   clean-webpack-plugin
 ```
-
 ### Configure webpack
 ```
 touch webpack.config.js
@@ -206,6 +239,17 @@ module.exports = {
 };
 ```
 
+## CSS/SASS Modules
+### Configure Modules Declaration
+```
+touch src/@types/declaration.d.ts
+```
+#### src/@types/declaration.d.ts
+```ts
+declare module '*.module.scss'
+declare module '*.module.sass'
+declare module '*.module.css'
+```
 ## Add Script
 #### package.json
 ```json
@@ -215,25 +259,16 @@ module.exports = {
 },
 ```
 
-## SASS
-```
-npm install sass sass-loader
-```
+## Prettier
 
-#### src/@types/declaration.d.ts
-```ts
-declare module '*.module.scss'
-declare module '*.module.sass'
-declare module '*.module.css'
-```
-
-## Install Prettier
+### Install Prettier
 ```
 npm install -D \
   prettier \
   eslint-config-prettier \
   eslint-plugin-prettier
-
+```
+```
 touch .prettierrc.js
 ```
 
@@ -245,22 +280,26 @@ module.exports = {
   jsxSingleQuote: false,
   singleQuote: true,
   printWidth: 120,
-  tabWidth: 4,
+  tabWidth: 2,
 };
 ```
 
-## Install ESLint
+## ESLint
+### Install Eslint
 ```
 npm install -D \
-  eslint@^7.32.0 || ^8.2.0 \
+  eslint@^8.6.0 \
+  eslint-config-airbnb@latest \
+  eslint-config-prettier \
+  eslint-plugin-import@^2.25.3 \
+  eslint-plugin-jsx-a11y@^6.5.1 \
+  eslint-plugin-prettier \
   eslint-plugin-react@^7.28.0 \
   eslint-plugin-react-hooks@^4.3.0 \
   @typescript-eslint/parser@latest \
-  @typescript-eslint/eslint-plugin@latest \
-  eslint-plugin-jsx-a11y@^6.5.1 \
-  eslint-plugin-import@^2.25.3 \
-  eslint-config-airbnb@latest    
-
+  @typescript-eslint/eslint-plugin@latest
+```
+```
 touch .eslintrc.js
 ```
 
@@ -307,7 +346,6 @@ touch .eslintrc.js
     }
   }
 }
-
 ```
 #### .eslintrc.js
 ```js
@@ -357,4 +395,50 @@ module.exports = {
     "lint": "eslint --fix \"./src/**/*.{js,jsx,ts,tsx,json}\"",
     "format": "prettier --write \"./src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
 },
+```
+
+## TailwindCSS
+
+### Install Tailwind
+```
+npm install -D tailwindcss postcss autoprefixer postcss-loader
+```
+```
+npx tailwindcss init -p
+```
+#### postcss.config.js
+```js
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  }
+}
+```
+#### tailwind.config.js
+```js
+module.exports = {
+  content: ["./src/**/*.{html,js}"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+#### main.css
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+#### webpack.config.js
+```js
+...
+{
+  test: /\.scss$/,
+  use: ['style-loader', 'css-loader', 'sass-loader', 'postcss-loader'],
+},
+...
 ```
